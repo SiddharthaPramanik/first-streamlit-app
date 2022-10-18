@@ -55,8 +55,8 @@ def get_fruit_load_list():
 # Write a function to add a fruit to the load_list
 def add_fruit_to_load_list(new_fruit):
   with my_cnx.cursor() as my_cur:
-    my_cur.execute("INSERT INTO FRUIT_LOAD_LIST VALUES('from streamlit')")
-    return "Thanks for adding" + new_fruit
+    my_cur.execute("INSERT INTO FRUIT_LOAD_LIST VALUES('" + new_fruit + "')")
+    return "Thanks for adding " + new_fruit
 
 # Add a button to load the fruits
 if streamlit.button('Get Fruit Load List'):
