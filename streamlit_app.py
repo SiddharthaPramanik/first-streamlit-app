@@ -23,12 +23,13 @@ fruits_to_show = my_fruit_list.loc[fruits_selected]
 # Display the table on the page
 streamlit.dataframe(fruits_to_show)
 
+# Fruityvice Section
+
 # Write function to fetch fruityvice data
 def get_fruityvice_data(this_fruit_choice):
   fruityvice_response = requests.get('https://fruityvice.com/api/fruit/' + this_fruit_choice)
   return pd.json_normalize(fruityvice_response.json())
 
-# New section to display Fruityvice API Response
 streamlit.header('Fruityvice Fruit Advice!')
 
 try:
@@ -43,22 +44,31 @@ try:
 except:
   streamlit.error()
 
-# Don't run anything past here while we troubleshoot
-streamlit.stop()
+# Snowflake Section
 
-# Snowflake
-my_cnx = snowflake.connector.connect(**streamlit.secrets["snowflake"])
-my_cur = my_cnx.cursor()
-# my_cur.execute("SELECT CURRENT_USER(), CURRENT_ACCOUNT(), CURRENT_REGION()")
-my_cur.execute("SELECT * FROM FRUIT_LOAD_LIST")
-my_data_row = my_cur.fetchall()
-# streamlit.text("Hello from Snowflake:")
-streamlit.header("The fruit load list contains:")
-streamlit.dataframe(my_data_row)
+# Write a fucntion to fetch fruit_load_lisy
+def get_fruit_load_list():
+  with my_cnx.cursor() as my_cur:
+    my_cur.execute("SELECT * FROM FRUIT_LOAD_LIST")
+    return my_cur.fetchall()
+  
+# Write a function to add a fruit to the load_list
+def add_fruit_to_load_list(new_fruit):
+  with my_cnx.cursor() as my_cur:
+    my_cur.execute("INSERT INTO FRUIT_LOAD_LIST VALUES('from streamlit')")
+    return "Thanks for adding" + new_fruit
 
-# User Input for adding fruit to the list
-# User input
+# Add a button to load the fruits
+if streamlit.button('Get Fruit Load List'):
+  my_cnx = snowflake.connector.connect(**streamlit.secrets["snowflake"])
+  my_data_rows = get_fruit_load_list()
+  streamlit.dataframe(my_data_rows)
+
+# Add a button to add fruit to the load list
 add_my_fruit = streamlit.text_input('What fruit would you like add?')
-streamlit.write('Thanks for adding', add_my_fruit)
-my_cur.execute("INSERT INTO FRUIT_LOAD_LIST VALUES('from streamlit')")
+if streamlit.button('Add Fruit to Load List'):
+  my_cnx = snowflake.connector.connect(**streamlit.secrets["snowflake"])
+  fruit_add_response = add_fruit_to_load_list(add_my_fruit)
+  streamlit.text(fruit_add_response)
+
 
